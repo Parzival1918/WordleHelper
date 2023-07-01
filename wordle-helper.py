@@ -47,14 +47,18 @@ def printPossibleWords(possibleWords: list):
         addToInput = ""
         if wrong_letters != None:
             addToInput = " -w " + wrong_letters.lower()
+        wrongOutput = ""
+        if wrong_letters != None:
+            wrongOutput = wrong_letters.lower()
 
         jsonOutput = {
             "possible-words": possibleWords,
+            "sorted": sort_output,
             "input": {
                 "user-input": user_input + addToInput,
                 "correct-letters": [{"char": letter.letter, "pos": letter.position} for letter in correctLetters],
                 "misplaced-letters": [{"char": letter.letter, "pos": letter.position} for letter in misplacedLetters],
-                "excluded-letters": wrong_letters
+                "excluded-letters": wrongOutput
             }
         }
         print(json.dumps(jsonOutput, indent=4))
@@ -84,9 +88,10 @@ def printPossibleWords(possibleWords: list):
 parser = ap.ArgumentParser()
 
 #Parser arguments
-parser.add_argument("-i", "--input", help="Word you tried in wordle", type=str)
+parser.add_argument("-i", "--input", help="Word you tried in wordle", type=str, required=True)
 parser.add_argument("-w", "--wrong", help="All wrong letters", type=str)
 parser.add_argument("-j", "--json-output", help="Output the results in json format", action="store_true")
+parser.add_argument("-s", "--sorted", help="Sort output by word usage", action="store_true")
 
 args = parser.parse_args()
 
@@ -95,6 +100,7 @@ args = parser.parse_args()
 user_input = args.input
 wrong_letters = args.wrong
 output_json = args.json_output
+sort_output = args.sorted
 
 if len(user_input) != 5:
     if not output_json:
@@ -182,5 +188,24 @@ for word in searchWords:
         continue
 
     possibleWords.append(word)
+
+if sort_output:
+    #load the csv file with word usage in Wrds/unigram_freq.csv
+    with open("Words/unigram_freq.csv", "r") as wordUsage:
+        wordUsageDict = {}
+        for line in wordUsage:
+            word, usage = line.split(",")
+            if len(word) == 5:
+                wordUsageDict[word] = int(usage)
+        #print(wordUsageDict)
+
+    #sort the possible words by usage
+    for word in possibleWords:
+        if word not in wordUsageDict:
+            wordUsageDict[word] = 0
+
+    possibleWords.sort(key=lambda x: wordUsageDict[x], reverse=True)
+    # print(wordUsageDict[possibleWords[0]])
+    # print(wordUsageDict[possibleWords[-1]])
 
 printPossibleWords(possibleWords)
