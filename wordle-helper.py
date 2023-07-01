@@ -36,12 +36,17 @@ def printPossibleWords(possibleWords: list):
         print(word)
 
 parser = ap.ArgumentParser()
+
+#Parser arguments
 parser.add_argument("word", help="Word you tried in wordle", type=str)
+parser.add_argument("-w", "--wrong", help="All wrong letters", type=str)
+
 args = parser.parse_args()
 
 #Ask for user input
 #user_input = input("Enter the word you tried in wordle: ")
 user_input = args.word
+wrong_letters = args.wrong
 
 #Parse the user input
 correctLetters = []
@@ -56,35 +61,48 @@ for i in range(len(user_input)):
         emptySpaces.append(Letter(None, i, False))
 
 #Read the wordlist file and compare each word to the user input
-possibleWords = []
 with open("Words/words.txt", "r") as wordlist:
+    #Eliminate words with letters in the wrong_letters string
+    searchWords = []
     for line in wordlist:
         word = line.strip()
-        #Check correct letters
-        correctCount = 0
+        if wrong_letters != None:
+            for letter in wrong_letters.lower():
+                if letter in word:
+                    break
+            else:
+                searchWords.append(word)
+        else:
+            searchWords.append(word)
+
+possibleWords = []
+for word in searchWords:
+    #word = line.strip()
+    #Check correct letters
+    correctCount = 0
+    for pos,letter in enumerate(word):
+        for correctLetter in correctLetters:
+            if correctLetter.position == pos and correctLetter.letter == letter:
+                correctCount += 1
+                break
+    
+    if correctCount != len(correctLetters):
+        #print("Correct letters don't match")
+        continue
+
+    #Check missplaced letters
+    #BUG This doesn't work if there are multiple of the same letter in the word
+    missplacedCount = 0
+    for missplacedLetter in missplacedLetters:
         for pos,letter in enumerate(word):
-            for correctLetter in correctLetters:
-                if correctLetter.position == pos and correctLetter.letter == letter:
-                    correctCount += 1
-                    break
-        
-        if correctCount != len(correctLetters):
-            #print("Correct letters don't match")
-            continue
+            if missplacedLetter.letter == letter and missplacedLetter.position != pos:
+                missplacedCount += 1
+                break
 
-        #Check missplaced letters
-        #BUG This doesn't work if there are multiple of the same letter in the word
-        missplacedCount = 0
-        for missplacedLetter in missplacedLetters:
-            for pos,letter in enumerate(word):
-                if missplacedLetter.letter == letter and missplacedLetter.position != pos:
-                    missplacedCount += 1
-                    break
+    if missplacedCount != len(missplacedLetters):
+        #print("Missplaced letters don't match")
+        continue
 
-        if missplacedCount != len(missplacedLetters):
-            #print("Missplaced letters don't match")
-            continue
-
-        possibleWords.append(word)
+    possibleWords.append(word)
 
 printPossibleWords(possibleWords)
