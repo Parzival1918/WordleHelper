@@ -1,3 +1,6 @@
+#!/opt/homebrew/bin/python3
+#CHANGE FIRST LINE TO YOUR PYTHON PATH
+
 #User input the word he tried in wordle. 
 # - Capital letters indicate letter in correct position
 # - Lowercase letters indicate letter in wrong position
@@ -9,6 +12,9 @@
 # Example:
 # User input: _a__E
 # Output: ['apple', 'angle', 'alive', 'alone', 'agile', 'ample', 'amaze', 'amuse', 'awake', 'aware', 'abate', 'abide', 'abuse']
+
+#Imports
+import argparse as ap
 
 #Class that stores a letter and position and whether it is correct or not
 class Letter:
@@ -29,9 +35,13 @@ def printPossibleWords(possibleWords: list):
     for word in possibleWords:
         print(word)
 
+parser = ap.ArgumentParser()
+parser.add_argument("word", help="Word you tried in wordle", type=str)
+args = parser.parse_args()
 
 #Ask for user input
-user_input = input("Enter the word you tried in wordle: ")
+#user_input = input("Enter the word you tried in wordle: ")
+user_input = args.word
 
 #Parse the user input
 correctLetters = []
