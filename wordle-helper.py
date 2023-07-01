@@ -63,6 +63,7 @@ with open("Words/words.txt", "r") as wordlist:
             continue
 
         #Check missplaced letters
+        #BUG This doesn't work if there are multiple of the same letter in the word
         missplacedCount = 0
         for missplacedLetter in missplacedLetters:
             for pos,letter in enumerate(word):
