@@ -15,6 +15,7 @@
 
 #Imports
 import argparse as ap
+import os
 
 #Class that stores a letter and position and whether it is correct or not
 class Letter:
@@ -44,10 +45,24 @@ def printPossibleWords(possibleWords: list):
     if len(possibleWords) == 0:
         print(TextColour.RED + "No words found with this combination" + TextColour.END)
         return
+    
+    termColumns = os.get_terminal_size().columns - 1
+    WORD_SIZE = 8
+
+    wordChunksperColumn = termColumns // WORD_SIZE
+    #print(wordChunksperColumn)
 
     print("Possible words: ")
+    wordCount = 1
     for word in possibleWords:
-        print(TextColour.PURPLE + " > " + TextColour.END + word)
+        if (wordCount) % wordChunksperColumn == 0:
+            print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip())
+        else:
+            print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip(), end="")
+        wordCount += 1
+
+    if (wordCount) % wordChunksperColumn != 0:
+        print() #For new line
 
 parser = ap.ArgumentParser()
 
