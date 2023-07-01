@@ -16,6 +16,7 @@
 #Imports
 import argparse as ap
 import os
+import json
 
 #Class that stores a letter and position and whether it is correct or not
 class Letter:
@@ -42,33 +43,50 @@ class TextColour:
     
 #Function to print possible words
 def printPossibleWords(possibleWords: list):
-    if len(possibleWords) == 0:
-        print(TextColour.RED + "No words found with this combination" + TextColour.END)
-        return
-    
-    termColumns = os.get_terminal_size().columns - 1
-    WORD_SIZE = 8
+    if output_json:
+        addToInput = ""
+        if wrong_letters != None:
+            addToInput = " -w " + wrong_letters.lower()
 
-    wordChunksperColumn = termColumns // WORD_SIZE
-    #print(wordChunksperColumn)
+        jsonOutput = {
+            "possible-words": possibleWords,
+            "input": {
+                "user-input": user_input + addToInput,
+                "correct-letters": [{"char": letter.letter, "pos": letter.position} for letter in correctLetters],
+                "misplaced-letters": [{"char": letter.letter, "pos": letter.position} for letter in misplacedLetters],
+                "excluded-letters": wrong_letters
+            }
+        }
+        print(json.dumps(jsonOutput, indent=4))
+    else:
+        if len(possibleWords) == 0:
+            print(TextColour.RED + "No words found with this combination" + TextColour.END)
+            return
+        
+        termColumns = os.get_terminal_size().columns - 1
+        WORD_SIZE = 8
 
-    print("Possible words: ")
-    wordCount = 1
-    for word in possibleWords:
-        if (wordCount) % wordChunksperColumn == 0:
-            print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip())
-        else:
-            print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip(), end="")
-        wordCount += 1
+        wordChunksperColumn = termColumns // WORD_SIZE
+        #print(wordChunksperColumn)
 
-    if (wordCount) % wordChunksperColumn != 0:
-        print() #For new line
+        print("Possible words: ")
+        wordCount = 1
+        for word in possibleWords:
+            if (wordCount) % wordChunksperColumn == 0:
+                print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip())
+            else:
+                print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip(), end="")
+            wordCount += 1
+
+        if (wordCount) % wordChunksperColumn != 0:
+            print() #For new line
 
 parser = ap.ArgumentParser()
 
 #Parser arguments
 parser.add_argument("-i", "--input", help="Word you tried in wordle", type=str)
 parser.add_argument("-w", "--wrong", help="All wrong letters", type=str)
+parser.add_argument("-j", "--json-output", help="Output the results in json format", action="store_true")
 
 args = parser.parse_args()
 
@@ -76,9 +94,11 @@ args = parser.parse_args()
 #user_input = input("Enter the word you tried in wordle: ")
 user_input = args.input
 wrong_letters = args.wrong
+output_json = args.json_output
 
 if len(user_input) != 5:
-    print(TextColour.RED + "Input must be 5 characters long" + TextColour.END)
+    if not output_json:
+        print(TextColour.RED + "Input must be 5 characters long" + TextColour.END)
     exit(1)
 
 buildString = ""
@@ -90,28 +110,31 @@ for letter in user_input:
     elif letter == "_":
         buildString += TextColour.BLACK + TextColour.UNDERLINE + letter + TextColour.END
     else:
-        print(TextColour.RED + "Invalid character in input: " + TextColour.CYAN + letter + TextColour.END)
+        if not output_json:
+            print(TextColour.RED + "Invalid character in input: " + TextColour.CYAN + letter + TextColour.END)
         exit(2)
 
-print("Input: " + buildString) #For new line
+if not output_json:
+    print("Input: " + buildString) #For new line
 
 if wrong_letters != None:
-    #print("Letters NOT in word: " + TextColour.RED + wrong_letters.upper().split(",") + TextColour.END)
-    print("Letters NOT in word: ", end="")
-    for letter in wrong_letters.upper():
-        print(TextColour.RED + letter + " " + TextColour.END, end="")
+    if not output_json:
+        #print("Letters NOT in word: " + TextColour.RED + wrong_letters.upper().split(",") + TextColour.END)
+        print("Letters NOT in word: ", end="")
+        for letter in wrong_letters.upper():
+            print(TextColour.RED + letter + " " + TextColour.END, end="")
 
-    print() #For new line
+        print() #For new line
 
 #Parse the user input
 correctLetters = []
-missplacedLetters = []
+misplacedLetters = []
 emptySpaces = []
 for i in range(len(user_input)):
     if user_input[i].isupper():
         correctLetters.append(Letter(user_input[i].lower(), i, True))
     elif user_input[i].islower():
-        missplacedLetters.append(Letter(user_input[i], i, False))
+        misplacedLetters.append(Letter(user_input[i], i, False))
     elif user_input[i] == "_":
         emptySpaces.append(Letter(None, i, False))
 
@@ -145,17 +168,17 @@ for word in searchWords:
         #print("Correct letters don't match")
         continue
 
-    #Check missplaced letters
+    #Check misplaced letters
     #BUG This doesn't work if there are multiple of the same letter in the word
-    missplacedCount = 0
-    for missplacedLetter in missplacedLetters:
+    misplacedCount = 0
+    for misplacedLetter in misplacedLetters:
         for pos,letter in enumerate(word):
-            if missplacedLetter.letter == letter and missplacedLetter.position != pos:
-                missplacedCount += 1
+            if misplacedLetter.letter == letter and misplacedLetter.position != pos:
+                misplacedCount += 1
                 break
 
-    if missplacedCount != len(missplacedLetters):
-        #print("Missplaced letters don't match")
+    if misplacedCount != len(misplacedLetters):
+        #print("misplaced letters don't match")
         continue
 
     possibleWords.append(word)
