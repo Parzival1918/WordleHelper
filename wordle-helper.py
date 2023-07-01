@@ -45,21 +45,48 @@ def printPossibleWords(possibleWords: list):
         print(TextColour.RED + "No words found with this combination" + TextColour.END)
         return
 
+    print("Possible words: ")
     for word in possibleWords:
-        print(word)
+        print(TextColour.PURPLE + " > " + TextColour.END + word)
 
 parser = ap.ArgumentParser()
 
 #Parser arguments
-parser.add_argument("word", help="Word you tried in wordle", type=str)
+parser.add_argument("-i", "--input", help="Word you tried in wordle", type=str)
 parser.add_argument("-w", "--wrong", help="All wrong letters", type=str)
 
 args = parser.parse_args()
 
 #Ask for user input
 #user_input = input("Enter the word you tried in wordle: ")
-user_input = args.word
+user_input = args.input
 wrong_letters = args.wrong
+
+if len(user_input) != 5:
+    print(TextColour.RED + "Input must be 5 characters long" + TextColour.END)
+    exit(1)
+
+buildString = ""
+for letter in user_input:
+    if letter.islower():
+        buildString += TextColour.YELLOW + letter.upper() + TextColour.END
+    elif letter.isupper():
+        buildString += TextColour.GREEN + letter + TextColour.END
+    elif letter == "_":
+        buildString += TextColour.BLACK + TextColour.UNDERLINE + letter + TextColour.END
+    else:
+        print(TextColour.RED + "Invalid character in input: " + TextColour.CYAN + letter + TextColour.END)
+        exit(2)
+
+print("Input: " + buildString) #For new line
+
+if wrong_letters != None:
+    #print("Letters NOT in word: " + TextColour.RED + wrong_letters.upper().split(",") + TextColour.END)
+    print("Letters NOT in word: ", end="")
+    for letter in wrong_letters.upper():
+        print(TextColour.RED + letter + " " + TextColour.END, end="")
+
+    print() #For new line
 
 #Parse the user input
 correctLetters = []
