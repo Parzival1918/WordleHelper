@@ -8,11 +8,9 @@ Input the correct letters and misplaced ones and program spits all words that co
 
 This was developed using Python 3.11.4.
 
-1. Clone the repository using `git clone -n --depth=1 --filter=tree:0 https://github.com/Parzival1918/WordleHelper`
-2. `cd WordleHelper` into the directory
-3. `git sparse-checkout set --no-cone code`
-4. `git checkout`. This will checkout only the code directory, with the program inside.
-5. Test that the code works by doing `python3 code/wordle-helper.py -h`
+1. Clone the repository using `git clone https://github.com/Parzival1918/WordleHelper.git`
+2. `cd WordleHelper/code` into the directory
+3. Test that the code works by doing `python3 code/wordle-helper.py -h`
 
 To run the program use `python3 wordle-helper.py` in the code directory.
 

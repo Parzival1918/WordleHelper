@@ -187,7 +187,7 @@ if wrong_letters != None:
                 exit(3)
 
 #Read the wordlist file and compare each word to the user input
-with open("Words/words.txt", "r") as wordlist:
+with open("../Words/words.txt", "r") as wordlist:
     #Eliminate words with letters in the wrong_letters string
     searchWords = []
     for line in wordlist:
@@ -248,7 +248,7 @@ for word in searchWords:
 
 if sort_output:
     #load the csv file with word usage in Wrds/unigram_freq.csv
-    with open("Words/unigram_freq.csv", "r") as wordUsage:
+    with open("../Words/unigram_freq.csv", "r") as wordUsage:
         wordUsageDict = {}
         for line in wordUsage:
             word, usage = line.split(",")
