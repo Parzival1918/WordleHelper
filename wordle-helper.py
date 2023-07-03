@@ -144,11 +144,20 @@ emptySpaces = []
 for user_input in user_inputs:
     for i in range(len(user_input)):
         if user_input[i].isupper():
-            correctLetters.append(Letter(user_input[i].lower(), i, True))
+            #Check that the letter is not already in the correct letters
+            alreadyAdded = False
+            for letter in correctLetters:
+                if letter.letter == user_input[i].lower() and letter.position == i:
+                    alreadyAdded = True
+
+            if not alreadyAdded:
+                correctLetters.append(Letter(user_input[i].lower(), i, True))
         elif user_input[i].islower():
             misplacedLetters.append(Letter(user_input[i], i, False))
         elif user_input[i] == "_":
             emptySpaces.append(Letter(None, i, False))
+
+#print(correctLetters)
 
 #Find unique letters in both correct and misplaced letters together
 uniqueLetters = []
@@ -219,7 +228,7 @@ for word in searchWords:
                 skipWord = True
                 break
 
-    if misplacedCount != len(misplacedLetters) or skipWord:
+    if misplacedCount < len(misplacedLetters) or skipWord:
         #print("misplaced letters don't match")
         continue
 
