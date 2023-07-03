@@ -82,13 +82,13 @@ def printPossibleWords(possibleWords: list):
                 print(TextColour.PURPLE + " > " + TextColour.END + word.rstrip(), end="")
             wordCount += 1
 
-        if (wordCount) % wordChunksperColumn != 0:
-            print() #For new line
+        #if (wordCount) % wordChunksperColumn != 0:
+        print() #For new line
 
 parser = ap.ArgumentParser()
 
 #Parser arguments
-parser.add_argument("-i", "--input", help="Word you tried in wordle", type=str, required=True)
+parser.add_argument("-i", "--input", help="Words you tried in wordle", type=str, required=True, nargs='*')
 parser.add_argument("-w", "--wrong", help="All wrong letters", type=str)
 parser.add_argument("-j", "--json-output", help="Output the results in json format", action="store_true")
 parser.add_argument("-s", "--sorted", help="Sort output by word usage", action="store_true")
@@ -97,28 +97,33 @@ args = parser.parse_args()
 
 #Ask for user input
 #user_input = input("Enter the word you tried in wordle: ")
-user_input = args.input
+user_inputs = args.input
 wrong_letters = args.wrong
 output_json = args.json_output
 sort_output = args.sorted
 
-if len(user_input) != 5:
-    if not output_json:
-        print(TextColour.RED + "Input must be 5 characters long" + TextColour.END)
-    exit(1)
+
+for user_input in user_inputs:
+    if len(user_input) != 5:
+        if not output_json:
+            print(TextColour.RED + "Input must be 5 characters long" + TextColour.END)
+        exit(1)
 
 buildString = ""
-for letter in user_input:
-    if letter.islower():
-        buildString += TextColour.YELLOW + letter.upper() + TextColour.END
-    elif letter.isupper():
-        buildString += TextColour.GREEN + letter + TextColour.END
-    elif letter == "_":
-        buildString += TextColour.BLACK + TextColour.UNDERLINE + letter + TextColour.END
-    else:
-        if not output_json:
-            print(TextColour.RED + "Invalid character in input: " + TextColour.CYAN + letter + TextColour.END)
-        exit(2)
+for user_input in user_inputs:
+    for letter in user_input:
+        if letter.islower():
+            buildString += TextColour.YELLOW + letter.upper() + TextColour.END
+        elif letter.isupper():
+            buildString += TextColour.GREEN + letter + TextColour.END
+        elif letter == "_":
+            buildString += TextColour.BLACK + TextColour.UNDERLINE + letter + TextColour.END
+        else:
+            if not output_json:
+                print(TextColour.RED + "Invalid character in input: " + TextColour.CYAN + letter + TextColour.END)
+            exit(2)
+
+    buildString += " "
 
 if not output_json:
     print("Input: " + buildString) #For new line
@@ -136,13 +141,41 @@ if wrong_letters != None:
 correctLetters = []
 misplacedLetters = []
 emptySpaces = []
-for i in range(len(user_input)):
-    if user_input[i].isupper():
-        correctLetters.append(Letter(user_input[i].lower(), i, True))
-    elif user_input[i].islower():
-        misplacedLetters.append(Letter(user_input[i], i, False))
-    elif user_input[i] == "_":
-        emptySpaces.append(Letter(None, i, False))
+for user_input in user_inputs:
+    for i in range(len(user_input)):
+        if user_input[i].isupper():
+            correctLetters.append(Letter(user_input[i].lower(), i, True))
+        elif user_input[i].islower():
+            misplacedLetters.append(Letter(user_input[i], i, False))
+        elif user_input[i] == "_":
+            emptySpaces.append(Letter(None, i, False))
+
+#Find unique letters in both correct and misplaced letters together
+uniqueLetters = []
+for letter in correctLetters:
+    if letter.letter not in uniqueLetters:
+        uniqueLetters.append(letter.letter)
+
+for letter in misplacedLetters:
+    if letter.letter not in uniqueLetters:
+        uniqueLetters.append(letter.letter)
+
+#print(uniqueLetters)
+
+#Check that letters in user input are not in the wrong_letters string
+if wrong_letters != None:
+    for letter in wrong_letters.lower():
+        for correctLetter in correctLetters:
+            if correctLetter.letter == letter:
+                if not output_json:
+                    print(TextColour.RED + "Letter in input is in wrong letters: " + TextColour.CYAN + letter.upper() + TextColour.END)
+                exit(3)
+
+        for misplacedLetter in misplacedLetters:
+            if misplacedLetter.letter == letter:
+                if not output_json:
+                    print(TextColour.RED + "Letter in input is in wrong letters: " + TextColour.CYAN + letter.lower() + TextColour.END)
+                exit(3)
 
 #Read the wordlist file and compare each word to the user input
 with open("Words/words.txt", "r") as wordlist:
@@ -176,17 +209,30 @@ for word in searchWords:
 
     #Check misplaced letters
     misplacedCount = 0
+    skipWord = False
     for misplacedLetter in misplacedLetters:
         for pos,letter in enumerate(word):
             if misplacedLetter.letter == letter and misplacedLetter.position != pos:
                 misplacedCount += 1
                 #break
             elif misplacedLetter.letter == letter and misplacedLetter.position == pos:
-                misplacedCount = 0
+                skipWord = True
                 break
 
-    if misplacedCount != len(misplacedLetters):
+    if misplacedCount != len(misplacedLetters) or skipWord:
         #print("misplaced letters don't match")
+        continue
+
+    #Check that all unique letters are in the word
+    skipWord = False
+    for letter in uniqueLetters:
+        #print(word)
+        if letter not in word:
+            #print("Unique letters don't match")
+            skipWord = True
+            break
+
+    if skipWord:
         continue
 
     possibleWords.append(word)
