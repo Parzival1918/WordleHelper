@@ -175,12 +175,14 @@ for word in searchWords:
         continue
 
     #Check misplaced letters
-    #BUG This doesn't work if there are multiple of the same letter in the word
     misplacedCount = 0
     for misplacedLetter in misplacedLetters:
         for pos,letter in enumerate(word):
             if misplacedLetter.letter == letter and misplacedLetter.position != pos:
                 misplacedCount += 1
+                #break
+            elif misplacedLetter.letter == letter and misplacedLetter.position == pos:
+                misplacedCount = 0
                 break
 
     if misplacedCount != len(misplacedLetters):
