@@ -1,5 +1,7 @@
 # WordleHelper
 
+![](docs/wordle-helper-vid.gif)
+
 Input the correct letters and misplaced ones and program spits all words that comply with that.
 
 ### wordle-helper.py Args
