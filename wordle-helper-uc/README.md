@@ -1,6 +1,6 @@
 # WordleHelper
 
-![](docs/wordle-helper-vid.gif)
+GitHub repository: https://github.com/Parzival1918/WordleHelper
 
 Input the correct letters and misplaced ones and program spits all words that comply with that.
 
