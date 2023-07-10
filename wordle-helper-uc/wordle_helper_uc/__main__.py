@@ -17,6 +17,7 @@
 import argparse as ap
 import os
 import json
+import requests
 from . import words
 
 #Class that stores a letter and position and whether it is correct or not
@@ -88,7 +89,6 @@ def printPossibleWords(args, possibleWords: list, output_json: bool, user_input:
 
         if args.definition:
             url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + possibleWords[0] #Get the first word
-            import requests
             try:
                 response = requests.get(url, timeout=2)
                 response.raise_for_status()
@@ -137,7 +137,7 @@ def main():
     parser.add_argument("-j", "--json-output", help="Output the results in json format", action="store_true")
     parser.add_argument("-s", "--sorted", help="Sort output by word usage", action="store_true")
     parser.add_argument("--definition", help="Get the definition of the first word.", action="store_true")
-    parser.add_argument('--version', action='version', version='%(prog)s 0.2.0')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.2.1')
 
     args = parser.parse_args()
 

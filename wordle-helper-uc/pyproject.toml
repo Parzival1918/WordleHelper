@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wordle-helper-uc"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = ["Pedro Juan Royo <pedro.juan.royo@gmail.com>"]
 readme = "README.md"
@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+requests = "^2.31.0"
 
 [tool.poetry.scripts]
 wordle-helper = "wordle_helper_uc.__main__:main"
