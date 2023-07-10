@@ -51,3 +51,9 @@ Output the result in json format
 ### *-s, -sorted*
 
 Sort the possible words by their usage in the english language. Information taken from https://www.kaggle.com/datasets/rtatman/english-word-frequency
+
+## To-Do
+
+* Add -v, --version.
+* Add -n, --next to propose a word to try next.
+* When there is only one matching word, show its definition from https://www.datamuse.com/api/.
