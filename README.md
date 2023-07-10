@@ -52,8 +52,14 @@ Output the result in json format
 
 Sort the possible words by their usage in the english language. Information taken from https://www.kaggle.com/datasets/rtatman/english-word-frequency
 
+### *--version*
+
+Print the version of the program.
+
+### *--definition*
+
+Print the definition of the first word of the list. Information taken from https://api.dictionaryapi.dev/api/v2/entries/en/.
+
 ## To-Do
 
-* Add -v, --version.
 * Add -n, --next to propose a word to try next.
-* When there is only one matching word, show its definition from https://www.datamuse.com/api/.

@@ -51,3 +51,11 @@ Output the result in json format
 ### *-s, -sorted*
 
 Sort the possible words by their usage in the english language. Information taken from https://www.kaggle.com/datasets/rtatman/english-word-frequency
+
+### *--version*
+
+Print the version of the program.
+
+### *--definition*
+
+Print the definition of the first word of the list. Information taken from https://api.dictionaryapi.dev/api/v2/entries/en/.

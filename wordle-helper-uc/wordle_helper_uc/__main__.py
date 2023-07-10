@@ -43,7 +43,7 @@ class TextColour:
    END = '\033[1;37;0m'
     
 #Function to print possible words
-def printPossibleWords(possibleWords: list, output_json: bool, user_input: str, correctLetters: list, misplacedLetters: list, wrong_letters: str, sort_output: bool):
+def printPossibleWords(args, possibleWords: list, output_json: bool, user_input: str, correctLetters: list, misplacedLetters: list, wrong_letters: str, sort_output: bool):
     if output_json:
         addToInput = ""
         if wrong_letters != None:
@@ -86,14 +86,58 @@ def printPossibleWords(possibleWords: list, output_json: bool, user_input: str, 
         #if (wordCount) % wordChunksperColumn != 0:
         print() #For new line
 
+        if args.definition:
+            url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + possibleWords[0] #Get the first word
+            import requests
+            try:
+                response = requests.get(url, timeout=2)
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as errh:
+                print(TextColour.RED + "Http Error:" + TextColour.END,errh)
+                return
+            except requests.exceptions.ConnectionError as errc:
+                print(TextColour.RED + "Error Connecting:" + TextColour.END,errc)
+                return
+            except requests.exceptions.Timeout as errt:
+                print(TextColour.RED + "Timeout Error:" + TextColour.END,errt)
+                return
+            except requests.exceptions.RequestException as err:
+                print(TextColour.RED + "Oops: Something Else" + TextColour.END,err)
+                return
+            
+            data = response.json()
+
+            if len(data) == 0:
+                print(TextColour.RED + "No definition found" + TextColour.END)
+                return
+            
+            #Print the definition and extra info
+            print(TextColour.GREEN + "Definition: " + TextColour.YELLOW + possibleWords[0] + TextColour.END)
+            #Phonetic
+            if "phonetic" in data[0]:
+                print(TextColour.CYAN + "   Phonetic: " + TextColour.YELLOW + data[0]["phonetic"] + TextColour.END)
+            #Origin
+            if "origin" in data[0]:
+                print(TextColour.CYAN + "   Origin: " + TextColour.YELLOW + data[0]["origin"] + TextColour.END)
+            #Meanings
+            if "meanings" in data[0]:
+                for pos,meaning in enumerate(data[0]["meanings"]):
+                    print(TextColour.CYAN + f"   ({pos+1}, {meaning['partOfSpeech']}): " + TextColour.YELLOW + meaning["definitions"][0]["definition"] + TextColour.END)
+                    #Example
+                    if "example" in meaning["definitions"][0]:
+                        print(TextColour.CYAN + "       |-> Example: " + TextColour.GREEN + TextColour.UNDERLINE + meaning["definitions"][0]["example"] + TextColour.END)
+
+
 def main():
-    parser = ap.ArgumentParser()
+    parser = ap.ArgumentParser(prog="wordle-helper", description="Program to help you find the Wordle of the day", epilog="Made by Pedro Juan Royo")
 
     #Parser arguments
     parser.add_argument("-i", "--input", help="Words you tried in wordle", type=str, required=True, nargs='*')
     parser.add_argument("-w", "--wrong", help="All wrong letters", type=str)
     parser.add_argument("-j", "--json-output", help="Output the results in json format", action="store_true")
     parser.add_argument("-s", "--sorted", help="Sort output by word usage", action="store_true")
+    parser.add_argument("--definition", help="Get the definition of the first word.", action="store_true")
+    parser.add_argument('--version', action='version', version='%(prog)s 0.2.0')
 
     args = parser.parse_args()
 
@@ -275,7 +319,7 @@ def main():
         # print(wordUsageDict[possibleWords[0]])
         # print(wordUsageDict[possibleWords[-1]])
 
-    printPossibleWords(possibleWords, output_json, user_inputs, correctLetters, misplacedLetters, wrong_letters, sort_output)
+    printPossibleWords(args, possibleWords, output_json, user_inputs, correctLetters, misplacedLetters, wrong_letters, sort_output)
 
 if __name__ == "__main__":
     main()
